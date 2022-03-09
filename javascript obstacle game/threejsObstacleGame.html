@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>İsmail Uzun MTK468 Bilgisayar Grafiği final 11.06.2021</title>
+		<style>
+			body { margin: 0px; padding: 0px;}
+			
+			#Overlay{
+				position : absolute ;
+				z-index:2;
+				font-size: 1.7em;
+				color:white; 
+			}
+
+		</style>
+	</head>
+	<body>
+		<canvas id="c"></canvas>
+		<div id='Overlay'>Press "Enter" to start , use W/S keys to move up and down</div>
+		<script type="module">
+			import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.114/build/three.module.js";
+			
+            //global değişkenler
+			let camera, scene, renderer;
+			var kus,bulutUst,bulutOrta,bulutAlt,kusClone;
+			var keyboardEvent;
+            var tusBasili = false;
+			var kusuDurdur = false;
+			var oyunuBitir = false;
+			var oyunuBaslat = false;
+			var firstBS,secondBS,carpisma;
+			var skor = 0;
+			var bulutlar = [];
+	
+
+			function init() {
+				//ortografik kamera 
+				camera = new THREE.OrthographicCamera(-50,50,25, -25, 1, 1000);
+				camera.position.z = 5;
+
+				//sahne,renderer,event listenerlar
+				scene = new THREE.Scene();
+				renderer = new THREE.WebGLRenderer({ antialias: true });
+				renderer.setSize(window.innerWidth, window.innerHeight);
+				document.body.appendChild( renderer.domElement );	
+				document.addEventListener("keydown", onDocumentKeyDown, false);
+                document.addEventListener("keyup", onDocumentKeyUp, false);
+
+				//ışıklar 
+				var spotLight = new THREE.SpotLight("white" , 0.5);
+                spotLight.position.set(50,0,100);
+				scene.add(spotLight);
+
+				var spotLight1 = new THREE.SpotLight("white" , 0.5);
+                spotLight1.position.set(-50,0,100);
+				scene.add(spotLight1);
+
+                //texture loader
+                const texture = new THREE.TextureLoader().load( "shell.jpg" );
+				texture.wrapS = THREE.RepeatWrapping;
+				texture.wrapT = THREE.RepeatWrapping;
+                
+
+                const texture1 = new THREE.TextureLoader().load( "purp.jpg" );
+				texture1.wrapS = THREE.RepeatWrapping;
+				texture1.wrapT = THREE.RepeatWrapping;
+
+                const texture2 = new THREE.TextureLoader().load( "purpSky.jpg" );
+				texture2.wrapS = THREE.RepeatWrapping;
+				texture2.wrapT = THREE.RepeatWrapping;
+
+                //arkaplan
+
+                const bgGeo = new THREE.PlaneGeometry(100,66,100,100);
+                const bgMaterial = new THREE.MeshBasicMaterial({ map: texture2});
+                const bg = new THREE.Mesh(bgGeo, bgMaterial);
+                scene.add(bg);
+
+			
+				//kuş
+				{ 
+					var kusKure = new THREE.SphereGeometry(1,16,12);
+					var kusmaterial = new THREE.MeshPhongMaterial({map :  texture});
+					kus = new THREE.Mesh(kusKure , kusmaterial);
+					kus.position.x = -30;
+                    scene.add( kus );
+				}
+			
+				//bulutlar, y ekseninde üst kısımdakiler
+
+				for(var i = 0 ; i < 500 ; i++){
+
+					var yaricap = Math.random()+1.2;
+					var genislik = yaricap*16;
+					var uzunluk = yaricap*12;
+					var kure = new THREE.SphereGeometry(yaricap, genislik, uzunluk);
+                    var material = new THREE.MeshPhongMaterial({map :  texture1});
+					bulutUst = new THREE.Mesh( kure, material );
+					
+					bulutUst.position.x = ((Math.random()*11) - 5) + 10*i;
+					bulutUst.position.y = Math.floor(Math.random()*10) + 5;
+				
+
+					scene.add( bulutUst );
+					bulutlar.push( bulutUst );
+				}	
+			
+
+				//bulutlar, y ekseninde alt kısımdakiler
+
+				for(var i = 0 ; i < 500 ; i++){
+
+					var yaricap = Math.random()+1.2;
+					var genislik = yaricap*16;
+					var uzunluk = yaricap*12;
+					var kure = new THREE.SphereGeometry(yaricap, genislik, uzunluk);
+                    var material = new THREE.MeshPhongMaterial({map :  texture1});
+					bulutAlt = new THREE.Mesh( kure, material );
+					
+					bulutAlt.position.x = ((Math.random()*11) - 5) + 10*i;
+					bulutAlt.position.y = -(Math.floor(Math.random()*10) + 5);
+				
+
+					scene.add( bulutAlt );
+					bulutlar.push( bulutAlt );
+
+
+				}	
+
+				//bulutlar, y ekseninde orta kısımdakiler
+
+				for(var i = 0 ; i < 500 ; i++){
+
+					var yaricap = Math.random()+1.2;
+					var genislik = yaricap*16;
+					var uzunluk = yaricap*12;
+					var kure = new THREE.SphereGeometry(yaricap, genislik, uzunluk);
+                    var material = new THREE.MeshPhongMaterial({map :  texture1});
+					bulutOrta = new THREE.Mesh( kure, material );
+					
+					bulutOrta.position.x = ((Math.random()*11) - 5) + 10*i;
+					bulutOrta.position.y = Math.floor(Math.random()*11) - 5 ;
+				
+
+					scene.add( bulutOrta );
+					bulutlar.push( bulutOrta );
+
+
+				}	
+
+                //alt ve üst sınır çizgileri
+                {
+                    var cizgiGeometry = new THREE.BoxGeometry(100,0.1,1);
+                    var cizgiMaterial = new THREE.MeshBasicMaterial({ color : "black"});
+                    var cizgiUst = new THREE.Mesh(cizgiGeometry,cizgiMaterial);
+                    var cizgiAlt = new THREE.Mesh(cizgiGeometry,cizgiMaterial);
+                    cizgiUst.position.y = 16;
+                    cizgiAlt.position.y = -16;
+                    scene.add(cizgiUst , cizgiAlt);
+            
+                }
+
+			}
+
+
+			//Event listener fonksiyonları 
+            //keydown - tuşa basılma durumu
+            function onDocumentKeyDown( event ) {
+                
+                keyboardEvent = event
+				tusBasili = true;
+			}
+            //keyup - tuşa basılmama durumu
+            function onDocumentKeyUp( event ) {
+                
+                keyboardEvent = event
+				tusBasili = false;
+			}
+            
+            //Klavye kontrolleri
+            function update (){
+
+                //tuşa basma eventinin keycode değişkenine atanması
+				var keyCode = keyboardEvent.keyCode; 
+
+				kusClone = kus.clone();
+
+				//tuş basılı true ise
+                if(tusBasili){
+                // W tuşu
+				if (keyCode == 87) {        	
+					kusClone.position.y += 0.125;
+				
+				} 
+				// S tuşu
+				else if (keyCode == 83) { 	
+					kusClone.position.y -= 0.125;
+				
+				}
+				//Enter tuşu
+				else if (keyCode == 13){
+					oyunuBaslat = true;
+				}
+                
+			}
+               
+			
+				//Hareketi kontrol edilen cisim için çarpışma kontrolü
+                
+				for(var i = 0 ; i < bulutlar.length ; i++){ 
+				//ilk obje
+				firstBS   = new THREE.Box3().setFromObject( kusClone );   
+                //diğer obje                         
+                secondBS     = new THREE.Box3().setFromObject( bulutlar[i] );  
+                carpisma = firstBS.intersectsBox( secondBS );
+				
+
+				// Eğer çarpışma var ise:
+				if ( carpisma ) {
+					kusuDurdur = true;
+					kus.position.x = -1000;
+					for(var i = 0 ; i < bulutlar.length ; i++){
+					scene.remove(bulutlar[i]);
+					}
+					document.getElementById("Overlay").firstChild.nodeValue = " Score: " + skor + "    " + " Refresh the page and try again!";
+				}
+					
+				
+				// Çarpışma yok ise
+				if(kusuDurdur == false){
+				//Kuş hareket etsin
+					kus.position.copy(kusClone.position);
+				}
+				
+			}
+                
+            }
+
+		
+            function animate() {
+
+				requestAnimationFrame( animate );
+			{   //Hareketi kontrol edilmeyen cisimler için çarpışma kontrolü   
+				kusClone = kus.clone();
+              	for(var i = 0 ; i < bulutlar.length ; i++){
+				//ilk obje
+				firstBS   = new THREE.Box3().setFromObject( kusClone );
+                //diğer obje  
+				secondBS     = new THREE.Box3().setFromObject( bulutlar[i] );
+                carpisma = firstBS.intersectsBox( secondBS );
+
+                //Çarpışma var ise
+				if(carpisma){
+                    //Oyunu bitir,kuş ve tüm bulutlar yok olsun 
+					oyunuBitir = true;
+					kus.position.x = -1000;
+					for(var i = 0 ; i < bulutlar.length ; i++){
+					scene.remove(bulutlar[i]);
+					}
+					document.getElementById("Overlay").firstChild.nodeValue = " Score: " + skor + "    " + " Refresh the page and try again!";
+				}
+			    //Çarpışma yok ise
+				if(oyunuBitir == false && oyunuBaslat == true){
+                    //Bulutlar hareketine başlasın veya devam etsin
+					for(var i = 0 ; i < bulutlar.length ; i++){
+					bulutlar[i].position.x -= 0.125;
+					if(bulutlar[i].position.x < -45){
+                        //çarpışma olmadan belli bir noktayı geçen bulutlar silinsin
+						scene.remove(bulutlar[i]);	
+					}
+					else if(bulutlar[i].position.x <= kus.position.x){
+                        //bulutları geçebilme durumuna göre skor artsın 
+						skor++;
+					}
+					}
+				}
+			}
+           
+			}
+
+				//Kuş için ekranda üst sınır
+				if(kus.position.y >= 15){
+				
+				kus.position.y = 15;
+				}
+				//Kuş için ekranda alt sınır
+				if(kus.position.y <= -15){
+
+				kus.position.y = -15;
+				}
+   				renderer.render( scene, camera );
+				
+                update();
+
+			}
+		    
+            init();
+			animate();
+			
+
+		</script>
+
+	</body>
+</html>
