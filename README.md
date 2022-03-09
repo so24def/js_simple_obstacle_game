@@ -1,5 +1,6 @@
 # simple-js-obstacle-game
 a simple browser game coded with javascript three.js library
+
 In order to succesfully run the game on Google Chrome (or any other browser), 
 Cross Origin Resource Sharing policy (CORS) has to be disabled.
 There are two simple ways to achieve that:
