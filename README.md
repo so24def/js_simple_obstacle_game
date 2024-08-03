@@ -9,8 +9,8 @@ There are two simple ways to achieve that:
 
 or
 
-- In the repo, "chrome cors disable.lnk" can be used to open a browser page with cors policy disabled, 
-then the html file can be opened by typing the recommended file path in the search bar.
+- In the repo, "chrome cors disable.bat" can be used to open a browser page with cors policy disabled, 
+then the html file can be opened by typing the recommended file path in the search bar. (Or drag-drop the html file on Chrome tab)
 
 
 Oyunu tarayıcıda başarılı bir şekilde çalıştırabilmek için tarayıcıdaki CORS politikası devre dışı bırakılmalıdır.
@@ -20,6 +20,6 @@ Bunu sağlamak için
 
 veya
 
-- Repo içindeki "chrome cors disable.lnk" dosyası açılarak, cors politikası devre dışı olan bir tarayıcı sayfası açılabilir.
-Daha sonra adres çubuğuna dosyaların konumu yazılarak html dosyası açılabilir.
+- Repo içindeki "chrome cors disable.bat" dosyası açılarak, cors politikası devre dışı olan bir tarayıcı sayfası açılabilir.
+Daha sonra adres çubuğuna html dosyasının konumu yazılarak açılabilir. (Veya html dosyası açılan Chrome üzerine sürüklenerek)
 
